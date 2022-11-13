@@ -1,10 +1,13 @@
 package me.project.Telegram;
 
+import me.project.Main.Main;
 import me.project.Minigames.Minigame;
 import me.project.Minigames.TicTacToe;
+import me.project.users.User;
 import org.telegram.telegrambots.bots.*;
 import java.util.function.*;
 
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.*;
 
 import org.telegram.telegrambots.meta.api.methods.send.*;
@@ -33,33 +36,66 @@ public class TelegramBot extends TelegramLongPollingBot
     private final String botUsername;
     private final String botToken;
 
-
-
-
-
-    public void sendMessage(int message, String msg) {
+    public void sendMessage(long chatId, String msg) {
         try {
-            execute(SendMessage.builder().chatId(message + "").text(msg).build());
+            execute(SendMessage.builder().chatId(chatId + "").text(msg).build());
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
-
-
+    public void sendKeyBoardInMenu(long chatId, String msg, ReplyKeyboardMarkup replykeyboardmarkup) {
+        try {
+            execute(SendMessage.builder().replyMarkup(replykeyboardmarkup).chatId(chatId + "").text(msg).build());
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+    public void sendKeyBoardInMessage(long chatId, String msg, InlineKeyboardMarkup inlinekeyboardmarkup) {
+        try {
+            execute(SendMessage.builder().replyMarkup(inlinekeyboardmarkup).chatId(chatId + "").text(msg).build());
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+    public void editMessage(long chatId, long messageId, String msg, InlineKeyboardMarkup inlinekeyboardmarkup) {
+        EditMessageText new_message = new EditMessageText();
+        new_message.setChatId(String.valueOf(chatId));
+        new_message.setMessageId(Math.toIntExact(messageId));
+        new_message.setText(msg);
+        if(inlinekeyboardmarkup != null) {
+            new_message.setReplyMarkup(inlinekeyboardmarkup);
+        }
+        try {
+            execute(new_message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onUpdateReceived(final Update update) {
         try {
             final Message message = update.getMessage();
-            ArrayList<Minigame> minigames = new ArrayList<Minigame>();
-            minigames.add(new TicTacToe());
-            for (Minigame game : minigames) {
+            for (Minigame game : Main.minigames) {
+
                 if (update.hasMessage() && message.hasText()) {
                     String query = message.getText();
                     long chatId = message.getFrom().getId();
+                    new User(chatId);
+                    game.MessageHandler(chatId, query);
                 }
                 if (update.hasCallbackQuery()) {
                     String query = update.getCallbackQuery().getData();
                     long chatId = update.getCallbackQuery().getMessage().getChatId();
+                    new User(chatId);
+                    long messageId = update.getCallbackQuery().getMessage().getMessageId();
+                    InlineKeyboardMarkup keyboardMarkup = update.getCallbackQuery().getMessage().getReplyMarkup();
+                    if(keyboardMarkup != null) {
+                        game.ClickHandler(chatId, messageId, query, keyboardMarkup);
+                    }
+                    else {
+                        game.ClickHandler(chatId, messageId, query, null);
+                    }
+
                 }
             }
         }
@@ -67,9 +103,6 @@ public class TelegramBot extends TelegramLongPollingBot
             throw $ex;
         }
     }
-    
-
-    
 
     
     @Override
@@ -85,7 +118,6 @@ public class TelegramBot extends TelegramLongPollingBot
 
     
     public TelegramBot(final String botUsername, final String botToken) {
-
         this.botUsername = botUsername;
         this.botToken = botToken;
     }
