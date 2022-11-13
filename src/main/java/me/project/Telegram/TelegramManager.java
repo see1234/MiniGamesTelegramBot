@@ -9,10 +9,10 @@ public class TelegramManager {
     private TelegramBot bot;
 
 
-    public TelegramManager(String token, String gameToken) {
+    public TelegramManager(String botName,String botToken) {
         try {
             final TelegramBotsApi api = new TelegramBotsApi(DefaultBotSession.class);
-            api.registerBot(this.bot = new TelegramBot(token, gameToken));
+            api.registerBot(this.bot = new TelegramBot(botName, botToken));
         } catch (Throwable $ex) {
             $ex.printStackTrace();
         }
