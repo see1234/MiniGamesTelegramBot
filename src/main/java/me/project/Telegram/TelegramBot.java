@@ -75,27 +75,28 @@ public class TelegramBot extends TelegramLongPollingBot
     public void onUpdateReceived(final Update update) {
         try {
             final Message message = update.getMessage();
-            for (Minigame game : Main.minigames) {
+            for (Minigame game : Main.getInstance().minigames) {
 
                 if (update.hasMessage() && message.hasText()) {
                     String query = message.getText();
                     long chatId = message.getFrom().getId();
-                    new User(chatId);
-                    game.MessageHandler(chatId, query);
+                    User user = User.getUser(chatId);
+                    game.MessageHandler(user, chatId, query);
+                    Main.getInstance().console.print("[" + chatId + " | " + message.getFrom().getUserName() + "]" + " (MESSAGE) " + query);
                 }
                 if (update.hasCallbackQuery()) {
                     String query = update.getCallbackQuery().getData();
                     long chatId = update.getCallbackQuery().getMessage().getChatId();
-                    new User(chatId);
                     long messageId = update.getCallbackQuery().getMessage().getMessageId();
+                    User user = User.getUser(chatId);
                     InlineKeyboardMarkup keyboardMarkup = update.getCallbackQuery().getMessage().getReplyMarkup();
                     if(keyboardMarkup != null) {
-                        game.ClickHandler(chatId, messageId, query, keyboardMarkup);
+                        game.ClickHandler(user, chatId, messageId, query, keyboardMarkup);
                     }
                     else {
-                        game.ClickHandler(chatId, messageId, query, null);
+                        game.ClickHandler(user, chatId, messageId, query, null);
                     }
-
+                    Main.getInstance().console.print("[" + chatId + " | " + update.getCallbackQuery().getFrom().getUserName() + "]" + " (BUTTON) " + query);
                 }
             }
         }

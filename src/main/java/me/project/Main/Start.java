@@ -11,7 +11,8 @@ public class Start {
 
     public static void main(String[] args) {
         printWelcome();
-        new Main();
+        Main main = new Main();
+        main.console.print("VERSION: " + main.version);
     }
 
     public static void printWelcome() {

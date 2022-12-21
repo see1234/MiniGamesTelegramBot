@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import me.project.ConsoleManager.Console;
 import me.project.Main.Config;
+import me.project.Main.Main;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.Yaml;
@@ -63,11 +65,11 @@ public class ConfigHandler {
 
     public static void loadConfig()  {
         try {
-            System.out.println("Config loading");
+            Main.getInstance().console.print("Config loading");
             config = ConfigHandler.getInstance().getConfig();
-            System.out.println("Config load");
+            Main.getInstance().console.print("Config load");
         } catch (Exception e) {
-            System.out.println("Config write exception:");
+            Main.getInstance().console.print("Config write exception:");
             e.printStackTrace();
             System.exit(1);
         }
