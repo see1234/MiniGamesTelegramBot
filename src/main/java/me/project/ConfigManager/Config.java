@@ -8,7 +8,13 @@ import java.util.Map;
 public class Config {
     private String botToken;
     private String botName;
-
+    public String host;
+    public String name;
+    public String name_table;
+    public String user;
+    public String password;
+    public int port;
+    public String type;
 
 
     Config() {}
