@@ -23,51 +23,7 @@ public class Helper extends Thread {
 
     @Override
     public void run(){
-        /*
-        try {
-            while(true) {
 
-try {
-                String result = getURLSource("https://pgusa.ru/studentu/raspisanie-zanyatiy/licei"); //Хеш сайта
-
-                int len = result.split("https://pgusa.ru/sites/default/files/raspisanie/licei/").length - 1; //Здесь я получаю длину полученных файлов
-                System.out.println("UPDATE CLASSES HELPER");//Уведомление что поток врублен
-                for (int i = 0; i < len; i++) { //Прохожусь по длине в 32 строке, и добавляю i++
-                    String date = result.split("raspisanie/licei/")[1].split("\"")[0]; //Разделяю строку на raspisanie/licei/ до \
-
-                    String kb = result.split("raspisanie/licei/" + date)[1].split("\\(")[1].split("\\)")[0].replaceAll("[^0-9.]", "");
-                   //Получаю килобайты файла, чтобы если сайт обновит расписание он прислал по новой
-                    result = result.replace("raspisanie/licei/" + date, ""); //Убираем эти строки из хеша сайта
-                    result = result.replace("Скачать (" + kb, ""); //Убираем эти строки из хеша сайта
-                    try { //Проверка на ошибки
-                        if (!playerExists(date + "_" + kb)) { //Проверка если ли в базе с такой датой и килобайтами
-                            if (date.contains("jpg")) { //Проверяет если фаил jpg
-                                sendPhotoIdAll(date);
-                            } else if (date.contains("pdf")) { //Проверяет если фаил pdf
-                                sendFileIdAll(date);
-                            } else { //Иные случаи если файл
-                                sendFileIdAll(date);
-                            }
-                            Main.getInstance().getDatabaseManager().update("INSERT INTO " + Main.getInstance().getDatabaseManager().getGameTable() + "_date(date) VALUES('" + date + "_" + kb + "')");
-                            //Добавление ссылки в базу чтоб по новой не слалось миллион раз
-                        }
-                    } catch (Exception ex) {//Проверка на ошибки
-                        ex.printStackTrace();//Проверка на ошибки
-                    }//Проверка на ошибки
-
-
-                }
-                Thread.sleep(300000); //Усыпление на 300 секунд (5 мин)
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            }
-
-
-        } catch (Exception e) {
-           e.printStackTrace();
-        }
-*/
 
     }
 
@@ -84,8 +40,7 @@ try {
         ResultSet resultSet = Main.getInstance().getDatabaseManager().getResult("SELECT * FROM " + "db");
         try {
             while (resultSet.next()) {
-                Main.getInstance().bot.getBot().sendImageFromUrl("https://pgusa.ru/sites/default/files/raspisanie/licei/" + date, resultSet.getString("name"));
-                Main.getInstance().console.print("Отправлен фаил " + date + "->" + resultSet.getString("name"));
+
             }
 
         } catch (SQLException e) {
@@ -97,8 +52,7 @@ try {
 
         try {
             while (resultSet.next()) {
-                Main.getInstance().bot.getBot().sendFile("https://pgusa.ru/sites/default/files/raspisanie/licei/" + date, resultSet.getString("name"));
-                Main.getInstance().console.print("Отправлен фаил " + date + "->" + resultSet.getString("name"));
+
             }
 
         } catch (SQLException e) {
