@@ -1,4 +1,4 @@
-package me.project.Main;
+package me.project.ConfigManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
