@@ -1,6 +1,7 @@
 package me.project.Telegram;
 
 
+import me.project.Minigames.Sapper;
 import org.telegram.telegrambots.meta.*;
 import org.telegram.telegrambots.meta.generics.*;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
@@ -13,6 +14,7 @@ public class TelegramManager {
         try {
             final TelegramBotsApi api = new TelegramBotsApi(DefaultBotSession.class);
             api.registerBot(this.bot = new TelegramBot(botName, botToken));
+
         } catch (Throwable $ex) {
             $ex.printStackTrace();
         }

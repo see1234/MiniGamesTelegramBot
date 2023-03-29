@@ -1,7 +1,7 @@
 package me.project.Main;
 
 import me.project.ConfigManager.ConfigHandler;
-import me.project.Main.Config;
+
 import me.project.Telegram.TelegramManager;
 
 import java.io.File;

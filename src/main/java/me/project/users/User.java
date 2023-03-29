@@ -11,7 +11,7 @@ public class User {
     public long chatId;
     public String nickname;
     public int game_id;
-    public HashMap<String, String> hash = new HashMap<String, String>();
+    public HashMap<String, Object> hash = new HashMap<String, Object>();
     public static ConcurrentHashMap<Long, User> users = new ConcurrentHashMap<Long, User>();
 
     public User(long chatId) {

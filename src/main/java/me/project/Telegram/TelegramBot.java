@@ -5,13 +5,25 @@ import me.project.Minigames.Minigame;
 import me.project.Minigames.TicTacToe;
 import me.project.users.User;
 import org.telegram.telegrambots.bots.*;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.function.*;
 
+import org.telegram.telegrambots.meta.api.methods.ActionType;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.*;
 
 import org.telegram.telegrambots.meta.api.methods.send.*;
 
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
+import org.telegram.telegrambots.meta.api.objects.polls.Poll;
+import org.telegram.telegrambots.meta.api.objects.polls.PollAnswer;
 import org.telegram.telegrambots.meta.exceptions.*;
 
 import org.telegram.telegrambots.bots.DefaultAbsSender;
@@ -43,6 +55,48 @@ public class TelegramBot extends TelegramLongPollingBot
             e.printStackTrace();
         }
     }
+    public void sendImageFromUrl(String url, String chatId) {
+        // Create send method
+        try {
+            SendPhoto sendPhotoRequest = new SendPhoto();
+            // Set destination chat id
+            sendPhotoRequest.setChatId(chatId);
+            // Set the photo url as a simple photo
+            sendPhotoRequest.setPhoto(new InputFile(url));
+            try {
+                // Execute the method
+                execute(sendPhotoRequest);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+        catch(Exception ex) {
+ex.printStackTrace();
+        }
+    }
+    public void getIdUserName() {
+
+    }
+    public void sendFile(String url, String chatId) {
+        // Create send method
+        try {
+            SendDocument sendDocumentRequest = new SendDocument();
+            // Set destination chat id
+            sendDocumentRequest.setChatId(chatId);
+            // Set the photo url as a simple photo
+            sendDocumentRequest.setDocument(new InputFile(url));
+            try {
+                // Execute the method
+                execute(sendDocumentRequest);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public void sendKeyBoardInMenu(long chatId, String msg, ReplyKeyboardMarkup replykeyboardmarkup) {
         try {
             execute(SendMessage.builder().replyMarkup(replykeyboardmarkup).chatId(chatId + "").text(msg).build());
@@ -66,15 +120,37 @@ public class TelegramBot extends TelegramLongPollingBot
             new_message.setReplyMarkup(inlinekeyboardmarkup);
         }
         try {
+
             execute(new_message);
+
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+    public void callbackAnswer(String callbackId) throws IOException, InterruptedException {
+        HttpClient telegramApiClient = HttpClient.newHttpClient();
+        HttpRequest telegramCallbackAnswerReq = HttpRequest.newBuilder(URI
+                        .create("https://api.telegram.org/bot" + Main.getInstance().bot.getBot().botToken +"/answerCallbackQuery?callback_query_id=" + callbackId))
+                .GET().build();
+
+        telegramApiClient.send(telegramCallbackAnswerReq, HttpResponse.BodyHandlers
+                .ofString());
     }
     @Override
     public void onUpdateReceived(final Update update) {
         try {
             final Message message = update.getMessage();
+
+            if (update.hasMessage() && message.hasText()) {
+                String query = message.getText();
+                long chatId = message.getFrom().getId();
+                Main.getInstance().console.print("[" + chatId + " | " + message.getFrom().getUserName() + "]" + " (MESSAGE) " + query);
+            }
+            if (update.hasCallbackQuery()) {
+                long chatId = update.getCallbackQuery().getMessage().getChatId();
+                String query = update.getCallbackQuery().getData();
+                Main.getInstance().console.print("[" + chatId + " | " + update.getCallbackQuery().getFrom().getUserName() + "]" + " (BUTTON) " + query);
+            }
             for (Minigame game : Main.getInstance().minigames) {
 
                 if (update.hasMessage() && message.hasText()) {
@@ -82,26 +158,49 @@ public class TelegramBot extends TelegramLongPollingBot
                     long chatId = message.getFrom().getId();
                     User user = User.getUser(chatId);
                     game.MessageHandler(user, chatId, query);
-                    Main.getInstance().console.print("[" + chatId + " | " + message.getFrom().getUserName() + "]" + " (MESSAGE) " + query);
+
                 }
                 if (update.hasCallbackQuery()) {
                     String query = update.getCallbackQuery().getData();
+                    String querymsg = update.getCallbackQuery().getMessage().getText();
+
                     long chatId = update.getCallbackQuery().getMessage().getChatId();
                     long messageId = update.getCallbackQuery().getMessage().getMessageId();
                     User user = User.getUser(chatId);
+                    if(!game.getClass().getName().contains("Help")) {
+                        if (!game.getPlayers().containsKey(chatId)) {
+
+                            continue;
+                        }
+
+                        if (!game.getPlayers().get(chatId).equals(game.getClass().getName())) {
+                            continue;
+                        }
+                    }
                     InlineKeyboardMarkup keyboardMarkup = update.getCallbackQuery().getMessage().getReplyMarkup();
                     if(keyboardMarkup != null) {
-                        game.ClickHandler(user, chatId, messageId, query, keyboardMarkup);
+                        game.ClickHandler(user, chatId, messageId, query, keyboardMarkup, querymsg);
                     }
                     else {
-                        game.ClickHandler(user, chatId, messageId, query, null);
+                        game.ClickHandler(user, chatId, messageId, query, null, querymsg);
                     }
-                    Main.getInstance().console.print("[" + chatId + " | " + update.getCallbackQuery().getFrom().getUserName() + "]" + " (BUTTON) " + query);
+                    callbackAnswer(update.getCallbackQuery().getId());
+
                 }
             }
         }
         catch (Throwable $ex) {
-            throw $ex;
+
+
+            try {
+                throw $ex;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+
         }
     }
 
